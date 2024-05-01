@@ -64,13 +64,16 @@
             <option value="yes">Yes</option>
             <option value="no">No</option>
         </select>
-
         <label for="date">Date:</label>
         <input type="date" id="date" name="date" required>
 
         <input type="submit" name="action" value="Submit" class="button">
     </form>
-    <input type="submit" name="action" value="View My Inventory" class="button">
-    <input type="submit" name="action" value="Download" class="button">
+    <form action="\inventory" method="post">
+        <button type="submit" name="inventory" class="button">View My Inventory</button>
+    </form>
+    <form action="\download" method="post">
+        <button type="submit" name="download" class="button">Download</button>
+    </form>
 </body>
 </html>
