@@ -6,8 +6,10 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 
 	"cs50-romain/tagl/storage"
+	"cs50-romain/tagl/types"
 )
 
 type Server struct {
@@ -36,7 +38,7 @@ func WriteJSON(w io.Writer, d any) error {
 }
 
 func WriteCSV(data [][]string) error {
-	file, err := os.OpenFile("./inventory.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile("./inventory.csv",os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		return err
 	}
@@ -50,4 +52,23 @@ func WriteCSV(data [][]string) error {
 
 	cw.Flush()
 	return nil
+}
+
+func DataToCSV(records []*types.EmployeeItems) [][]string {
+	data := [][]string{
+		{"Record ID", "Employee Name", "Item Name", "Date Acquired", "Quantity", "Ticker Number"},
+	}
+
+	// Could be made into a function - better testing
+	for _, record := range records {
+		strEmployeeID := strconv.Itoa(record.Id)
+		strQuantity := strconv.Itoa(record.Quantity)
+		strTicket := strconv.Itoa(record.TicketNumber)
+
+		recordData := []string{strEmployeeID, record.EmployeeName, record.ItemName, record.AcquisitionDate.Format("2006-01-02"), strQuantity, strTicket}
+
+		data = append(data, recordData)
+	}
+	return data
+
 }

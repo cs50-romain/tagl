@@ -46,8 +46,7 @@ func (s *Server) HandleSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("Record added!")
-	
-	http.ServeFile(w, r, "./static/index.html")
+	http.Redirect(w, r, "/index", http.StatusSeeOther)
 }
 
 func (s *Server) handleInventory(w http.ResponseWriter, r *http.Request) {
@@ -67,16 +66,17 @@ func (s *Server) handleDownload(w http.ResponseWriter, r *http.Request) {
 
 	employeeName := r.FormValue("employeeName")
 	fmt.Println("Name:", employeeName)
-	//employeeItems, _ := s.Store.GetEmployeeByName(employeeName)
-
-	// DATA WILL BE IMPORTED FROM DB LATER
-	data := [][]string{
-		{"Record ID", "Employee Name", "Item Name", "Date Acquired", "Quantity", "Ticker Number"},
+	employeeItems, err := s.Store.GetEmployeeByName(employeeName)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
+
+	data := DataToCSV(employeeItems)
 
 	if err := WriteCSV(data); err != nil {
 	        w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode("Unable to open file ")
+		json.NewEncoder(w).Encode("Unable to download file.")
 		return	
 	}
 	w.Header().Set("Content-Disposition", "attachment; filename=inventory.csv")
