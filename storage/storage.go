@@ -3,5 +3,7 @@ package storage
 import "cs50-romain/tagl/types"
 
 type Storer interface {
-	Get(int) *types.Employee
+	createTable(string) error
+	GetEmployeeByID(int) *types.EmployeeItems
+	CreateEmployee(*types.EmployeeItems) error
 }
