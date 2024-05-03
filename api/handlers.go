@@ -28,12 +28,14 @@ func (s *Server) HandleSubmit(w http.ResponseWriter, r *http.Request) {
 	ticketNum, err := strconv.Atoi(ticket)
 	if err != nil {
 		fmt.Println(err)
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
 
 	quantity, err := strconv.Atoi(quantityStr)
 	if err != nil {
 		fmt.Println(err)
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -42,6 +44,7 @@ func (s *Server) HandleSubmit(w http.ResponseWriter, r *http.Request) {
 
 	err = s.Store.CreateEmployee(employeeItem)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -53,7 +56,10 @@ func (s *Server) handleInventory(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(util.Fore(util.Yellow, "request:"), r.RequestURI)
 	employeeName := r.FormValue("employeeName")
 	fmt.Println("Name:", employeeName)
-	employeeItems, _ := s.Store.GetEmployeeByName(employeeName)
+	employeeItems, err := s.Store.GetEmployeeByName(employeeName)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "application/json")
