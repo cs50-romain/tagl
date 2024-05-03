@@ -19,7 +19,7 @@ func NewMysqlStore() (*MySQLDB, error) {
 	dbname := "mysql"
 	//ssldisable := true
 
-	connStr := fmt.Sprintf("%s:%s@/%s", user, password, dbname)
+	connStr := fmt.Sprintf("%s:%s@/%s?parseTime=true", user, password, dbname)
 
 	db, err := sql.Open("mysql", connStr)
 	if err != nil {
@@ -39,11 +39,24 @@ func NewMysqlStore() (*MySQLDB, error) {
 	return mydb, nil
 }
 
-func (s *MySQLDB) GetEmployeeByID(id int) *types.EmployeeItems {
-	return &types.EmployeeItems{
-		Id: id,
-		EmployeeName: "name",
-	}	
+func (s *MySQLDB) GetEmployeeByName(name string) ([]*types.EmployeeItems, error) {
+	var employeeItems []*types.EmployeeItems
+	rows, err := s.Db.Query("select * from EmployeeItems where employee_name = ?", name)
+	if err != nil {
+		fmt.Println("error query:", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var employeeItem types.EmployeeItems
+		if err := rows.Scan(&employeeItem.Id, &employeeItem.EmployeeName, &employeeItem.ItemName, &employeeItem.AcquisitionDate, &employeeItem.Quantity, &employeeItem.TicketNumber); err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		employeeItems = append(employeeItems, &employeeItem)
+	}
+	return employeeItems, nil
 }
 
 func (s *MySQLDB) CreateEmployee(employee *types.EmployeeItems) error {
