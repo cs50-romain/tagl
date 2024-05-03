@@ -52,22 +52,26 @@ func (s *Server) HandleSubmit(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleInventory(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(util.Fore(util.Yellow, "request:"), r.RequestURI)
-	item := types.NewItem("HDMI2VGA", 2)
+	employeeName := r.FormValue("employeeName")
+	fmt.Println("Name:", employeeName)
+	employeeItems, _ := s.Store.GetEmployeeByName(employeeName)
+
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "application/json")
-	WriteJSON(w, item)
+	WriteJSON(w, employeeItems)
 }
 
 // User receives a csv file of his inventory. Need csv, writeto.
 func (s *Server) handleDownload(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(util.Fore(util.Yellow, "request:"), r.RequestURI)
-	
+
+	employeeName := r.FormValue("employeeName")
+	fmt.Println("Name:", employeeName)
+	//employeeItems, _ := s.Store.GetEmployeeByName(employeeName)
+
 	// DATA WILL BE IMPORTED FROM DB LATER
 	data := [][]string{
-		{"first_name", "last_name", "username"},
-		{"Rob", "Pike", "rob"},
-		{"Ken", "Thompson", "ken"},
-		{"Robert", "Griesemer", "gri"},
+		{"Record ID", "Employee Name", "Item Name", "Date Acquired", "Quantity", "Ticker Number"},
 	}
 
 	if err := WriteCSV(data); err != nil {
