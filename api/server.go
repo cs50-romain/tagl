@@ -26,11 +26,20 @@ func NewServer(addr string, store storage.Storer) *Server {
 
 func (s *Server) Start() error {
 	router := http.NewServeMux()
-	router.HandleFunc("/index", s.getIndex)
-	router.HandleFunc("/submit", s.HandleSubmit)
-	router.HandleFunc("/inventory", s.handleInventory)
-	router.HandleFunc("/download", s.handleDownload)
+	router.HandleFunc("/index", customHandler(s.getIndex))
+	router.HandleFunc("/submit", customHandler(s.HandleSubmit))
+	router.HandleFunc("/inventory", customHandler(s.handleInventory))
+	router.HandleFunc("/download", customHandler(s.handleDownload))
 	return http.ListenAndServe(s.addr, router)
+}
+
+ func customHandler(f func(w http.ResponseWriter, r *http.Request) error ) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request){
+		err := f(w, r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
 }
 
 func WriteJSON(w io.Writer, d any) error {
